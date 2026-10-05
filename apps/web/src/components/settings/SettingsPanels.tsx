@@ -1795,9 +1795,9 @@ function FontSettingsGroup() {
 
 /**
  * The two-font view: one sans, one monospace, plus the reading size. The
- * prompt takes the interface font at the chat text size and the terminal
- * follows the monospace font, so the demos under each row show every surface
- * the choice reaches.
+ * prompt takes the interface font (and a chosen chat text size) and the
+ * terminal follows the monospace font, so the demos under each row show every
+ * surface the choice reaches.
  */
 function SimpleFontRows() {
   const settings = useScopedSettings();

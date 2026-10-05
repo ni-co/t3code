@@ -112,9 +112,12 @@ describe("resolveTerminalFontSizePreference", () => {
 });
 
 describe("resolvePromptFontSizePreference", () => {
-  it("sizes the prompt like the chat text in simple mode", () => {
+  it("sizes the prompt like a chosen chat text size in simple mode", () => {
     expect(resolvePromptFontSizePreference({ advanced: false, chat: 17, prompt: 14 })).toBe(17);
-    expect(resolvePromptFontSizePreference({ advanced: false, chat: null, prompt: 14 })).toBeNull();
+  });
+
+  it("keeps the prompt's own size while the chat size is Auto", () => {
+    expect(resolvePromptFontSizePreference({ advanced: false, chat: null, prompt: 16 })).toBe(16);
   });
 
   it("keeps the prompt size independent in advanced mode", () => {
@@ -139,19 +142,18 @@ describe("applyAppearanceFontVariables", () => {
     composer: "",
     sizeInterface: 16,
     sizeChat: null,
-    sizePrompt: null,
+    sizePrompt: 14,
     sizeCode: 13,
     smoothing: false,
   };
 
-  it("leaves chat and prompt text on the interface scale when unset", () => {
+  it("leaves chat text on the interface scale when unset", () => {
     const { root, style, properties } = fakeRoot();
     properties.set("--font-size-chat", "18px");
-    properties.set("--font-size-prompt", "18px");
     applyAppearanceFontVariables(root, { ...preferences, sizeInterface: 18 });
     expect(style.fontSize).toBe("18px");
     expect(properties.has("--font-size-chat")).toBe(false);
-    expect(properties.has("--font-size-prompt")).toBe(false);
+    expect(properties.get("--font-size-prompt")).toBe("14px");
   });
 
   it("sizes chat text independently of the interface", () => {

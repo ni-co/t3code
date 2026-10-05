@@ -53,15 +53,16 @@ export function resolveTerminalFontSizePreference(input: {
 }
 
 /**
- * Simple typography sizes the composer like the conversation it writes into.
- * Null means the chat size is unset and both follow the interface size.
+ * Simple typography sizes the composer like the conversation it writes into
+ * once a chat size is chosen. While the chat size is unset (Auto), the prompt
+ * keeps its own size, so existing settings render unchanged.
  */
 export function resolvePromptFontSizePreference(input: {
   readonly advanced: boolean;
   readonly chat: number | null;
   readonly prompt: number;
-}): number | null {
-  if (input.advanced) return input.prompt;
+}): number {
+  if (input.advanced || input.chat === null) return input.prompt;
   return input.chat;
 }
 
@@ -99,8 +100,7 @@ export interface AppearanceFontPreferences {
   readonly sizeInterface: number;
   /** Null follows the interface size. */
   readonly sizeChat: number | null;
-  /** Null follows the interface size. */
-  readonly sizePrompt: number | null;
+  readonly sizePrompt: number;
   readonly sizeCode: number;
   /** Grayscale `antialiased` rendering; false keeps the heavier platform default. */
   readonly smoothing: boolean;
@@ -112,8 +112,8 @@ export interface AppearanceFontPreferences {
  *
  * The interface size drives the root font size (and with it every rem-based
  * dimension), while the chat, prompt and code sizes stay in absolute pixels so
- * they do not scale twice. An unset chat or prompt size removes its override,
- * so those surfaces fall back to their rem-based size and follow the interface.
+ * they do not scale twice. An unset chat size removes its override, so the
+ * conversation falls back to its rem-based size and follows the interface.
  */
 export function applyAppearanceFontVariables(
   root: HTMLElement,
@@ -135,8 +135,12 @@ export function applyAppearanceFontVariables(
   }
 
   root.style.fontSize = `${clampInterfaceFontSize(preferences.sizeInterface)}px`;
-  setOptionalFontSize(root, "--font-size-chat", preferences.sizeChat, clampChatFontSize);
-  setOptionalFontSize(root, "--font-size-prompt", preferences.sizePrompt, clampPromptFontSize);
+  if (preferences.sizeChat === null) {
+    root.style.removeProperty("--font-size-chat");
+  } else {
+    root.style.setProperty("--font-size-chat", `${clampChatFontSize(preferences.sizeChat)}px`);
+  }
+  root.style.setProperty("--font-size-prompt", `${clampPromptFontSize(preferences.sizePrompt)}px`);
   const code = clampCodeFontSize(preferences.sizeCode);
   root.style.setProperty("--font-size-code", `${code}px`);
   // The @pierre/diffs surfaces read their own hook for code text.
@@ -150,19 +154,6 @@ export function applyAppearanceFontVariables(
     root.style.setProperty("-webkit-font-smoothing", "antialiased");
   } else {
     root.style.removeProperty("-webkit-font-smoothing");
-  }
-}
-
-function setOptionalFontSize(
-  root: HTMLElement,
-  variable: string,
-  size: number | null,
-  clamp: (value: number) => number,
-): void {
-  if (size === null) {
-    root.style.removeProperty(variable);
-  } else {
-    root.style.setProperty(variable, `${clamp(size)}px`);
   }
 }
 
