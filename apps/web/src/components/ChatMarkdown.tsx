@@ -554,9 +554,11 @@ const CHAT_MARKDOWN_SANITIZE_SCHEMA = {
 /**
  * Conversation text size for replies and sent messages: the Chat text
  * preference when set, otherwise the rem-based default that follows the
- * interface size.
+ * interface size. `--chat-text-size` scales the markdown's secondary sizes
+ * (headings, inline code, tables) with it; see index.css.
  */
-export const CHAT_TEXT_SIZE_CLASS_NAME = "text-(length:--font-size-chat,var(--text-sm))";
+export const CHAT_TEXT_SIZE_CLASS_NAME =
+  "[--chat-text-size:var(--font-size-chat,var(--text-sm))] text-(length:--chat-text-size)";
 
 const CHAT_MARKDOWN_REMARK_PLUGINS = [
   remarkGfm,
