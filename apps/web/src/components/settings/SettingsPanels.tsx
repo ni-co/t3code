@@ -1581,13 +1581,13 @@ function InterfaceFontRow({ preview }: { preview?: ReactNode }) {
  * Reading size for the conversation, separate from the interface scale. Auto
  * keeps today's behavior: the text follows the interface size.
  */
-function ChatTextRow({ preview }: { preview: ReactNode }) {
+function ChatTextRow({ description, preview }: { description: string; preview: ReactNode }) {
   const settings = useScopedSettings();
   const updateSettings = useUpdateScopedSettings();
   return (
     <SettingsRow
       {...searchableSetting("chat-text")}
-      description="Replies and your messages in the conversation."
+      description={description}
       resetAction={
         settings.fontSizeChat !== DEFAULT_UNIFIED_SETTINGS.fontSizeChat ? (
           <SettingResetButton
@@ -1784,7 +1784,10 @@ function FontSettingsGroup() {
   return (
     <>
       <InterfaceFontRow />
-      <ChatTextRow preview={<ChatTextPreview />} />
+      <ChatTextRow
+        description="Replies and your messages in the conversation."
+        preview={<ChatTextPreview />}
+      />
       <PromptFontRow />
       <CodeFontRow />
       <TerminalFontRow />
@@ -1805,6 +1808,7 @@ function SimpleFontRows() {
     <>
       <InterfaceFontRow />
       <ChatTextRow
+        description="Replies, your messages, and the prompt box once you pick a size."
         preview={
           <>
             <ChatTextPreview />

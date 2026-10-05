@@ -175,10 +175,16 @@ export function clampPromptFontSize(value: number): number {
   return clampFontSize(value, MIN_PROMPT_FONT_SIZE, MAX_PROMPT_FONT_SIZE, DEFAULT_PROMPT_FONT_SIZE);
 }
 
+// What an unset (Auto) chat size renders at under the default interface size.
+const AUTO_CHAT_FONT_SIZE_AT_DEFAULT_INTERFACE = 14;
+
 export function clampChatFontSize(value: number): number {
-  // An out-of-range value lands on the size an unset preference renders at
-  // under the default interface size.
-  return clampFontSize(value, MIN_CHAT_FONT_SIZE, MAX_CHAT_FONT_SIZE, DEFAULT_PROMPT_FONT_SIZE);
+  return clampFontSize(
+    value,
+    MIN_CHAT_FONT_SIZE,
+    MAX_CHAT_FONT_SIZE,
+    AUTO_CHAT_FONT_SIZE_AT_DEFAULT_INTERFACE,
+  );
 }
 
 export function clampCodeFontSize(value: number): number {

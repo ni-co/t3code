@@ -1792,7 +1792,7 @@ code {
 :is(.chat-markdown, .composer-tiptap) h4,
 :is(.chat-markdown, .composer-tiptap) h5,
 :is(.chat-markdown, .composer-tiptap) h6 {
-  font-size: calc(var(--chat-text-size, 0.875rem) * 0.875 / 0.875);
+  font-size: var(--chat-text-size, 0.875rem);
 }
 
 :is(.chat-markdown, .composer-tiptap) h6 {
