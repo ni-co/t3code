@@ -551,6 +551,13 @@ const CHAT_MARKDOWN_SANITIZE_SCHEMA = {
   },
 } satisfies Parameters<typeof rehypeSanitize>[0];
 
+/**
+ * Conversation text size for replies and sent messages: the Chat text
+ * preference when set, otherwise the rem-based default that follows the
+ * interface size.
+ */
+export const CHAT_TEXT_SIZE_CLASS_NAME = "text-(length:--font-size-chat,var(--text-sm))";
+
 const CHAT_MARKDOWN_REMARK_PLUGINS = [
   remarkGfm,
   remarkKeepWindowsPathDestinations,

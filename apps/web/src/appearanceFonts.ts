@@ -9,9 +9,11 @@ import {
   DEFAULT_CODE_FONT_SIZE,
   DEFAULT_INTERFACE_FONT_SIZE,
   DEFAULT_PROMPT_FONT_SIZE,
+  MAX_CHAT_FONT_SIZE,
   MAX_CODE_FONT_SIZE,
   MAX_INTERFACE_FONT_SIZE,
   MAX_PROMPT_FONT_SIZE,
+  MIN_CHAT_FONT_SIZE,
   MIN_CODE_FONT_SIZE,
   MIN_INTERFACE_FONT_SIZE,
   MIN_PROMPT_FONT_SIZE,
@@ -50,6 +52,19 @@ export function resolveTerminalFontSizePreference(input: {
   return input.code;
 }
 
+/**
+ * Simple typography sizes the composer like the conversation it writes into.
+ * Null means the chat size is unset and both follow the interface size.
+ */
+export function resolvePromptFontSizePreference(input: {
+  readonly advanced: boolean;
+  readonly chat: number | null;
+  readonly prompt: number;
+}): number | null {
+  if (input.advanced) return input.prompt;
+  return input.chat;
+}
+
 function quoteFontFamilyName(name: string): string {
   const bare = name.trim();
   if (bare.length === 0) return "";
@@ -82,7 +97,10 @@ export interface AppearanceFontPreferences {
   readonly code: string;
   readonly composer: string;
   readonly sizeInterface: number;
-  readonly sizePrompt: number;
+  /** Null follows the interface size. */
+  readonly sizeChat: number | null;
+  /** Null follows the interface size. */
+  readonly sizePrompt: number | null;
   readonly sizeCode: number;
   /** Grayscale `antialiased` rendering; false keeps the heavier platform default. */
   readonly smoothing: boolean;
@@ -92,9 +110,10 @@ export interface AppearanceFontPreferences {
  * Apply the preferences to the root element. Unset families remove the
  * override so the stylesheet defaults (and theme changes) stay in charge.
  *
- * Sizes are always written: the interface size drives the root font size (and
- * with it every rem-based dimension), while the prompt and code sizes stay in
- * absolute pixels so they do not scale twice.
+ * The interface size drives the root font size (and with it every rem-based
+ * dimension), while the chat, prompt and code sizes stay in absolute pixels so
+ * they do not scale twice. An unset chat or prompt size removes its override,
+ * so those surfaces fall back to their rem-based size and follow the interface.
  */
 export function applyAppearanceFontVariables(
   root: HTMLElement,
@@ -116,7 +135,8 @@ export function applyAppearanceFontVariables(
   }
 
   root.style.fontSize = `${clampInterfaceFontSize(preferences.sizeInterface)}px`;
-  root.style.setProperty("--font-size-prompt", `${clampPromptFontSize(preferences.sizePrompt)}px`);
+  setOptionalFontSize(root, "--font-size-chat", preferences.sizeChat, clampChatFontSize);
+  setOptionalFontSize(root, "--font-size-prompt", preferences.sizePrompt, clampPromptFontSize);
   const code = clampCodeFontSize(preferences.sizeCode);
   root.style.setProperty("--font-size-code", `${code}px`);
   // The @pierre/diffs surfaces read their own hook for code text.
@@ -130,6 +150,19 @@ export function applyAppearanceFontVariables(
     root.style.setProperty("-webkit-font-smoothing", "antialiased");
   } else {
     root.style.removeProperty("-webkit-font-smoothing");
+  }
+}
+
+function setOptionalFontSize(
+  root: HTMLElement,
+  variable: string,
+  size: number | null,
+  clamp: (value: number) => number,
+): void {
+  if (size === null) {
+    root.style.removeProperty(variable);
+  } else {
+    root.style.setProperty(variable, `${clamp(size)}px`);
   }
 }
 
@@ -149,6 +182,12 @@ export function clampInterfaceFontSize(value: number): number {
 
 export function clampPromptFontSize(value: number): number {
   return clampFontSize(value, MIN_PROMPT_FONT_SIZE, MAX_PROMPT_FONT_SIZE, DEFAULT_PROMPT_FONT_SIZE);
+}
+
+export function clampChatFontSize(value: number): number {
+  // An out-of-range value lands on the size an unset preference renders at
+  // under the default interface size.
+  return clampFontSize(value, MIN_CHAT_FONT_SIZE, MAX_CHAT_FONT_SIZE, DEFAULT_PROMPT_FONT_SIZE);
 }
 
 export function clampCodeFontSize(value: number): number {
